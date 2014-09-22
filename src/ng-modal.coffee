@@ -24,7 +24,7 @@ app.provider "ngModalDefaults", ->
     else
       @options[keyOrHash] = value
 
-app.directive 'modalDialog', ['ngModalDefaults', '$sce', (ngModalDefaults, $sce) ->
+app.directive 'modalDialog', ['ngModalDefaults', '$sce', '$document', (ngModalDefaults, $sce, $document) ->
   restrict: 'E'
   scope:
     show: '='
@@ -47,11 +47,18 @@ app.directive 'modalDialog', ['ngModalDefaults', '$sce', (ngModalDefaults, $sce)
     scope.$watch('show', (newVal, oldVal) ->
       if newVal && !oldVal
         document.getElementsByTagName("body")[0].style.overflow = "hidden";
+        $document.bind('keyup', scope.closeOnEsc);
       else
         document.getElementsByTagName("body")[0].style.overflow = "";
+        $document.unbind('keyup', scope.closeOnEsc);
       if (!newVal && oldVal) && scope.onClose?
         scope.onClose()
     )
+
+    scope.closeOnEsc = (event) ->
+      if event.keyCode == 27
+        scope.hideModal()
+        scope.$apply()
 
     setupCloseButton()
     setupStyle()

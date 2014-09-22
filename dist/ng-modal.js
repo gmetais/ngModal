@@ -28,7 +28,7 @@
   });
 
   app.directive('modalDialog', [
-    'ngModalDefaults', '$sce', function(ngModalDefaults, $sce) {
+    'ngModalDefaults', '$sce', '$document', function(ngModalDefaults, $sce, $document) {
       return {
         restrict: 'E',
         scope: {
@@ -58,13 +58,21 @@
           scope.$watch('show', function(newVal, oldVal) {
             if (newVal && !oldVal) {
               document.getElementsByTagName("body")[0].style.overflow = "hidden";
+              $document.bind('keyup', scope.closeOnEsc);
             } else {
               document.getElementsByTagName("body")[0].style.overflow = "";
+              $document.unbind('keyup', scope.closeOnEsc);
             }
             if ((!newVal && oldVal) && (scope.onClose != null)) {
               return scope.onClose();
             }
           });
+          scope.closeOnEsc = function(event) {
+            if (event.keyCode === 27) {
+              scope.hideModal();
+              return scope.$apply();
+            }
+          };
           setupCloseButton();
           return setupStyle();
         },
